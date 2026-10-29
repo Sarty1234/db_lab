@@ -149,7 +149,8 @@ def GetShipsByOrder(order_id: int):
         WHERE ohs.order_id = %s;
     """
     my_cursor.execute(query, (order_id,))
-    result = [ShipItem(*(x[2:])) for x in my_cursor]
+    # result = [ShipItem(*(x[2:])) for x in my_cursor]
+    result = [x for x in my_cursor]
     return result
 
 
