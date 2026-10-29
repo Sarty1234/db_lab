@@ -3,11 +3,24 @@ import uvicorn
 import dao
 import atexit
 import ModelsDTO
+from fastapi.middleware.cors import CORSMiddleware
 
 # http://127.0.0.1:8000/docs
 
 app = FastAPI()
 
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
 
 
 
@@ -17,8 +30,8 @@ app = FastAPI()
     tags=['Ships'],
     summary = "Get all ships"
 )
-def read_ships(id: int = None, search: str = None, type: str = None, weight_class: str = None):
-    result = dao.GetShip(id, search, type, weight_class)
+def read_ships(id: int = None, search: str = None, type: str = None, weight_class: str = None, order: str = None):
+    result = dao.GetShip(id, search, type, weight_class, order)
     if not result:
         raise HTTPException(status_code=404, detail="Ship not found")
     return result

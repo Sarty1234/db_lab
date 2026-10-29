@@ -37,7 +37,8 @@ def GetShip(
         strictIDFilter: int = 0, 
         softSearchFilter: str = "", 
         softShipTypeFilter = None, 
-        softWeightClassFilter = None
+        softWeightClassFilter = None, 
+        order = None
 ):
     query = "SELECT * FROM mydb.ship WHERE 1=1"
     params = []
@@ -58,7 +59,12 @@ def GetShip(
     if softWeightClassFilter is not None and softWeightClassFilter != "":
         query += " AND weight_class_id = %s"
         params.append(softWeightClassFilter)
-        
+
+    if order:
+        query += " ORDER BY price_hour ASC"
+    else:
+        query += " ORDER BY header_title ASC"
+
     query += ";"
     
     my_cursor.execute(query, tuple(params))
@@ -137,13 +143,13 @@ def DeleteShip(ship_id: int):
 
 def GetShipsByOrder(order_id: int):
     query = """
-        SELECT s.* 
+        SELECT ohs.order_start, ohs.order_end, s.* 
         FROM mydb.ship s
         JOIN mydb.order_has_ship ohs ON s.id = ohs.ship_id
         WHERE ohs.order_id = %s;
     """
     my_cursor.execute(query, (order_id,))
-    result = [ShipItem(*x) for x in my_cursor]
+    result = [ShipItem(*(x[2:])) for x in my_cursor]
     return result
 
 
