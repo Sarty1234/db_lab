@@ -20,7 +20,7 @@ USE `mydb` ;
 DROP TABLE IF EXISTS `mydb`.`account_status` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`account_status` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -33,7 +33,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`account_type` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`account_type` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -46,7 +46,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`account` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`account` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `account_type_id` INT NOT NULL,
   `account_status_id` INT NOT NULL,
   `number` VARCHAR(45) NOT NULL,
@@ -73,7 +73,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`account_access_status` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`account_access_status` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -86,7 +86,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`card_status` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`card_status` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -99,7 +99,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`card_type` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`card_type` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB
@@ -112,7 +112,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`card` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`card` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `account_id` INT NOT NULL,
   `card_type_id` INT NOT NULL,
   `card_status_id` INT NOT NULL,
@@ -147,7 +147,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`client` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`client` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NOT NULL,
   `surname` VARCHAR(45) NOT NULL,
   `middlename` VARCHAR(45) NOT NULL,
@@ -215,7 +215,7 @@ DEFAULT CHARACTER SET = utf8mb3;
 DROP TABLE IF EXISTS `mydb`.`transaction` ;
 
 CREATE TABLE IF NOT EXISTS `mydb`.`transaction` (
-  `id` INT NOT NULL,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `account_id` INT NOT NULL,
   `reciever_account_id` INT NOT NULL,
   `datetime` DATETIME NOT NULL,
