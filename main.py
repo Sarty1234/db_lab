@@ -1,214 +1,34 @@
-from fastapi import FastAPI, HTTPException
-import uvicorn
-import business
-import atexit
-import ModelsDTO
-import dao
-from fastapi.middleware.cors import CORSMiddleware
+# main.py updates
+import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
-# http://127.0.0.1:8000/docs
+from domain import Base, Client
+from dao.client_dao import ClientDAO
+from dao.account_dao import AccountDAO
 
-app = FastAPI()
+load_dotenv()
+DATABASE_URL = f"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+engine = create_engine(DATABASE_URL, echo=False)
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+def test_daos():
+    client_dao = ClientDAO()
+    account_dao = AccountDAO()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allows all headers
-)
+    with Session(engine) as session:
+        # 1. Get client by ID using DAO
+        client = client_dao.get_by_id(session, 1)
+        print(f"Retrieved via DAO: {client!r}")
 
+        # 2. Use custom DAO method
+        if client and client.email:
+            found_by_email = client_dao.get_by_email(session, client.email)
+            print(f"Found by email query: {found_by_email!r}")
 
-
-####################### SHIP #######################
-@app.get(
-    "/ships",
-    tags=['Ships'],
-    summary = "Get all ships"
-)
-def read_ships(id: int = None, search: str = None, type: str = None, weight_class: str = None, order: str = None):
-    result = business.GetShip(id, search, type, weight_class, order)
-    if not result:
-        raise HTTPException(status_code=404, detail="Ship not found")
-    return result
-
-
-@app.post(
-    "/ships",
-    tags = ['Ships'],
-    summary = "Create new ship"
-)
-def create_ship(new_ship: ModelsDTO.NewShipItem):
-    business.CreateShip(new_ship)
-    return {"success": True, "message": "Ship added successfully"}
-
-
-@app.put(
-    "/ships",
-    tags = ['Ships'],
-    summary = "Update ship"
-)
-def update_ship(new_ship: ModelsDTO.NewShipItem):
-    result = business.UpdateShip(new_ship)
-    if not result:
-        raise HTTPException(status_code=404, detail="Ship not found")
-    
-    return {"success": True, "message": "Ship updated successfully"}
-
-
-@app.delete(
-    "/ships/{ship_id}",
-    tags = ['Ships'],
-    summary = "Delete ship"
-)
-def delete_ship(ship_id: int):
-    result = business.DeleteShip(ship_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Ship not found")
-    
-    return {"success": True, "message": "Ship removed successfully"}
-
-
-
-
-
-
-####################### USER #######################
-
-@app.get("/users", tags=['Users'], summary="Get all users")
-def read_users(id: int = None, search_login: str = None):
-    result = business.GetUser(id or 0, search_login or "")
-    if not result:
-        raise HTTPException(status_code=404, detail="User not found")
-    return result
-
-
-@app.post("/users", tags=['Users'], summary="Create new user")
-def create_user(new_user: ModelsDTO.NewUserItem):
-    business.CreateUser(new_user)
-    return {"success": True, "message": "User added successfully"}
-
-
-@app.put("/users", tags=['Users'], summary="Update user")
-def update_user(user: ModelsDTO.NewUserItem):
-    result = business.UpdateUser(user)
-    if not result:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"success": True, "message": "User updated successfully"}
-
-
-@app.delete("/users/{user_id}", tags=['Users'], summary="Delete user")
-def delete_user(user_id: int):
-    result = business.DeleteUser(user_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="User not found")
-    return {"success": True, "message": "User removed successfully"}
-
-
-@app.get(
-    "/users/{user_id}/orders",
-    tags=['Users'],
-    summary="Get all orders for a specific client/user"
-)
-def get_user_orders(user_id: int):
-    result = business.GetOrdersByUser(user_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="No orders found for this user")
-    return result
-
-
-
-
-####################### ORDER #######################
-
-@app.get("/orders", tags=['Orders'], summary="Get all orders")
-def read_orders(id: int = None, user_id: int = None):
-    result = business.GetOrder(id or 0, user_id or 0)
-    if not result:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return result
-
-
-@app.post("/orders", tags=['Orders'], summary="Create new order")
-def create_order(new_order: ModelsDTO.NewOrderItem):
-    business.CreateOrder(new_order)
-    return {"success": True, "message": "Order added successfully"}
-
-
-@app.put("/orders", tags=['Orders'], summary="Update order")
-def update_order(order: ModelsDTO.NewOrderItem):
-    result = business.UpdateOrder(order)
-    if not result:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"success": True, "message": "Order updated successfully"}
-
-
-@app.delete("/orders/{order_id}", tags=['Orders'], summary="Delete order")
-def delete_order(order_id: int):
-    result = business.DeleteOrder(order_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Order not found")
-    return {"success": True, "message": "Order removed successfully"}
-
-
-@app.get(
-    "/orders/{order_id}/ships",
-    tags=['Orders'],
-    summary="Get all ships in a specific order"
-)
-def get_order_ships(order_id: int):
-    result = business.GetShipsByOrder(order_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="No ships found for this order")
-    return result
-
-
-
-####################### ORDER_HAS_SHIP #######################
-
-@app.get("/order-ships", tags=['Order Ships'], summary="Get order-ship relations")
-def read_order_ships(order_id: int = None, ship_id: int = None):
-    result = business.GetOrderHasShip(order_id or 0, ship_id or 0)
-    if not result:
-        raise HTTPException(status_code=404, detail="Relation not found")
-    return result
-
-
-@app.post("/order-ships", tags=['Order Ships'], summary="Create order-ship relation")
-def create_order_ship(new_relation: ModelsDTO.NewOrderHasShipItem):
-    business.CreateOrderHasShip(new_relation)
-    return {"success": True, "message": "Relation added successfully"}
-
-
-@app.put("/order-ships", tags=['Order Ships'], summary="Update order-ship relation")
-def update_order_ship(relation: ModelsDTO.NewOrderHasShipItem):
-    result = business.UpdateOrderHasShip(relation)
-    if not result:
-        raise HTTPException(status_code=404, detail="Relation not found")
-    return {"success": True, "message": "Relation updated successfully"}
-
-
-@app.delete("/order-ships/{order_id}/{ship_id}", tags=['Order Ships'], summary="Delete order-ship relation")
-def delete_order_ship(order_id: int, ship_id: int):
-    result = business.DeleteOrderHasShip(order_id, ship_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Relation not found")
-    return {"success": True, "message": "Relation removed successfully"}
-
-
-
-
-
-def OnAppClose():
-    dao.Destruct()
+        # 3. Get all accounts using the generic DAO
+        accounts = account_dao.get_all(session, limit=50)
+        print(f"Accounts found: {accounts}")
 
 if __name__ == "__main__":
-    atexit.register(OnAppClose)
-    uvicorn.run("main:app", reload=True)
-
-    
+    test_daos()

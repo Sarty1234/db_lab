@@ -38,8 +38,6 @@ def UpdateShip(updatedShip: ShipItem):
 
 
 def CreateShip(newShip: ShipItem):
-    if newShip.name:
-        newShip.name = newShip.name.strip()
 
     result = dao.CreateShip(newShip)
     return result
