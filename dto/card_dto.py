@@ -13,6 +13,7 @@ class NewCardItem(BaseModel):
     account_id: int
     card_type_id: Optional[int] = None
     card_status_id: Optional[int] = None
+    card_pattern_id: Optional[int] = None
 
 class UpdateCardItem(BaseModel):
     id: int

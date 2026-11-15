@@ -9,6 +9,7 @@ from .account_status import AccountStatus
 from .account_access_status import AccountAccessStatus
 from .card_status import CardStatus
 from .card_type import CardType
+from .card_pattern import CardPattern
 from .client_account import ClientAccount
 from .account import Account
 from .card import Card
