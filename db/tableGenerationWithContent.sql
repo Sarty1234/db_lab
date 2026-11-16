@@ -8,11 +8,14 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- Schema mydb
 -- -----------------------------------------------------
 
+DROP DATABASE IF EXISTS `mydb`;
+CREATE DATABASE `mydb` CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci;
+
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
 CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8mb3 ;
-USE `mydb` ;
+USE `mydb`;
 
 -- -----------------------------------------------------
 -- Table `mydb`.`account_status`
@@ -590,6 +593,83 @@ BEGIN
     END LOOP;
     CLOSE name_cursor;
 END//
+
+
+
+
+
+DROP TRIGGER IF EXISTS `mydb`.`trg_account_no_double_zero_insert`//
+DROP TRIGGER IF EXISTS `mydb`.`trg_account_no_double_zero_update`//
+
+CREATE TRIGGER `mydb`.`trg_account_no_double_zero_insert`
+BEFORE INSERT ON `mydb`.`account`
+FOR EACH ROW
+BEGIN
+    IF CAST(NEW.balance AS CHAR) LIKE '%00' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Balance can`t end with 00';
+    END IF;
+END//
+
+CREATE TRIGGER `mydb`.`trg_account_no_double_zero_update`
+BEFORE UPDATE ON `mydb`.`account`
+FOR EACH ROW
+BEGIN
+    IF CAST(NEW.balance AS CHAR) LIKE '%00' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Balance can`t end with 00';
+    END IF;
+END//
+
+
+
+
+DROP TRIGGER IF EXISTS `mydb`.`trg_prevent_transaction_delete`//
+
+CREATE TRIGGER `mydb`.`trg_prevent_transaction_delete`
+BEFORE DELETE ON `mydb`.`transaction`
+FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Can`t delete from transaction';
+END//
+
+
+
+
+
+
+DROP TRIGGER IF EXISTS `mydb`.`trg_account_status_max_rows`//
+DROP TRIGGER IF EXISTS `mydb`.`trg_account_status_min_rows`//
+
+CREATE TRIGGER `mydb`.`trg_account_status_max_rows`
+BEFORE INSERT ON `mydb`.`account_status`
+FOR EACH ROW
+BEGIN
+    DECLARE v_count INT;
+    SELECT COUNT(*) INTO v_count FROM `mydb`.`account_status`;
+    
+    IF v_count >= 6 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'account_status can`t have more than 6 records';
+    END IF;
+END//
+
+
+
+CREATE TRIGGER `mydb`.`trg_account_status_min_rows`
+BEFORE DELETE ON `mydb`.`account_status`
+FOR EACH ROW
+BEGIN
+    DECLARE v_count INT;
+    SELECT COUNT(*) INTO v_count FROM `mydb`.`account_status`;
+    
+    IF v_count <= 2 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'account_status can`t have less than 2 records';
+    END IF;
+END//
+
 
 
 
