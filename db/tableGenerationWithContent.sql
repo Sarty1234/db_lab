@@ -420,7 +420,12 @@ VALUES
 
 DELIMITER //
 
-CREATE TRIGGER check_card_pattern_exists_before_insert
+
+DROP TRIGGER IF EXISTS `check_card_pattern_exists_before_insert`//
+DROP TRIGGER IF EXISTS `check_card_pattern_exists_before_update`//
+
+
+CREATE TRIGGER `check_card_pattern_exists_before_insert`
 BEFORE INSERT ON `mydb`.`card`
 FOR EACH ROW
 BEGIN
@@ -430,7 +435,8 @@ BEGIN
     END IF;
 END//
 
-CREATE TRIGGER check_card_pattern_exists_before_update
+
+CREATE TRIGGER `check_card_pattern_exists_before_update`
 BEFORE UPDATE ON `mydb`.`card`
 FOR EACH ROW
 BEGIN
@@ -439,6 +445,43 @@ BEGIN
         SET MESSAGE_TEXT = 'Error: this card pattern does not exist';
     END IF;
 END//
+
+
+DROP PROCEDURE IF EXISTS `sp_insert_account`//
+
+CREATE PROCEDURE `sp_insert_account` (
+    IN p_account_type_id INT,
+    IN p_account_status_id INT,
+    IN p_number VARCHAR(45),
+    IN p_credentials VARCHAR(45),
+    IN p_name VARCHAR(45),
+    IN p_balance INT,
+    IN p_creditscore INT,
+    OUT p_new_id INT
+)
+BEGIN
+    INSERT INTO `account` (
+        `account_type_id`, 
+        `account_status_id`, 
+        `number`, 
+        `credentials`, 
+        `name`, 
+        `balance`, 
+        `creditscore`
+    ) 
+    VALUES (
+        p_account_type_id, 
+        p_account_status_id, 
+        p_number, 
+        p_credentials, 
+        p_name, 
+        p_balance, 
+        p_creditscore
+    );
+    
+    SET p_new_id = LAST_INSERT_ID();
+END//
+
 
 DELIMITER ;
 

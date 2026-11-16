@@ -19,6 +19,10 @@ class AccountService:
     def create(self, session: Session, data: dict) -> Account:
         return self.dao.create(session, data)
 
+    def create_with_procedure(self, session: Session, data: dict) -> Account:
+        new_id = self.dao.call_insert_procedure(session, data)
+        return self.dao.get_by_id(session, new_id)
+
     def update(self, session: Session, account_id: int, data: dict) -> Optional[Account]:
         account = self.dao.get_by_id(session, account_id)
         if account:

@@ -107,6 +107,20 @@ DEFAULT CHARACTER SET = utf8mb3;
 
 
 -- -----------------------------------------------------
+-- Table `mydb`.`card_pattern`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `mydb`.`card_pattern` ;
+
+CREATE TABLE IF NOT EXISTS `mydb`.`card_pattern` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `pattern_path` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
 -- Table `mydb`.`card`
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `mydb`.`card` ;
@@ -116,6 +130,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`card` (
   `account_id` INT NOT NULL,
   `card_type_id` INT NOT NULL,
   `card_status_id` INT NOT NULL,
+  `card_pattern_id` INT NOT NULL,
   `name` VARCHAR(45) NOT NULL,
   `creation_date` DATETIME NOT NULL,
   `number` VARCHAR(20) NOT NULL,
@@ -317,6 +332,12 @@ INSERT INTO `mydb`.`card_status` (`id`, `name`) VALUES
   (3, 'Permanently Blocked (Lost/Stolen)'),
   (4, 'Expired');
 
+INSERT INTO `mydb`.`card_pattern` (`id`, `name`, `pattern_path`) VALUES
+  (1, 'Classic Blue', 'patterns/blue.png'),
+  (2, 'Dark Obsidian', 'patterns/dark.png'),
+  (3, 'Gold Metallic', 'patterns/gold.png'),
+  (4, 'Minimalist White', 'patterns/white.png');
+
 -- -----------------------------------------------------
 -- 2. Accounts
 -- -----------------------------------------------------
@@ -360,19 +381,20 @@ INSERT INTO `mydb`.`client_account` (`account_id`, `client_id`, `account_access_
 -- -----------------------------------------------------
 
 INSERT INTO `mydb`.`card` 
-  (`id`, `account_id`, `card_type_id`, `card_status_id`, `name`, `creation_date`, `number`, `cvv`, `pin`, `secret_word`) 
+  (`id`, `account_id`, `card_type_id`, `card_status_id`, `card_pattern_id`, `name`, `creation_date`, `number`, `cvv`, `pin`, `secret_word`) 
 VALUES
-  (1,  1,  2, 1, 'Petro Corporate MC',      '2021-01-15 10:00:00', '4149491122334401', '412', '1984', 'Dnipro'),
-  (2,  2,  1, 1, 'Oksana Debit Visa',       '2021-03-20 11:30:00', '5168752233445502', '829', '4321', 'Carpathians'),
-  (3,  3,  2, 1, 'Taras MC Standard',       '2021-06-12 14:15:00', '4149493344556603', '109', '7744', 'Odesa'),
-  (4,  4,  3, 2, 'Yulia Credit Gold',       '2021-08-01 09:00:00', '4149494455667704', '654', '1122', 'Kashtan'),
-  (5,  5,  1, 1, 'Andrii Platinum Visa',    '2021-09-18 16:45:00', '5168755566778805', '331', '9081', 'Kharkiv'),
-  (6,  6,  5, 1, 'Iryna Virtual Shopping',  '2022-02-10 12:20:00', '4149496677889906', '942', '5566', 'Summer'),
-  (7,  7,  2, 3, 'Dmytro Debit (Lost)',     '2022-04-05 15:10:00', '5168757788990007', '215', '3412', 'Horizon'),
-  (8,  8,  1, 1, 'Nataliia Everyday Visa',  '2022-07-22 17:35:00', '4149498899001108', '773', '6789', 'Poltava'),
-  (9,  9,  4, 1, 'Maksym World Elite MC',   '2022-11-03 13:00:00', '5168759900112209', '480', '2024', 'Desna'),
-  (10, 10, 5, 1, 'Olena Digital Pass',      '2023-01-19 18:40:00', '4149490011223310', '167', '8123', 'Hoverla'),
-  (11, 11, 2, 1, 'Serhii Business MC',      '2023-05-14 10:25:00', '5168751122334411', '593', '4490', 'Lutsk');
+  (1,  1,  2, 1, 1, 'Petro Corporate MC',      '2021-01-15 10:00:00', '4149491122334401', '412', '1984', 'Dnipro'),
+  (2,  2,  1, 1, 2, 'Oksana Debit Visa',       '2021-03-20 11:30:00', '5168752233445502', '829', '4321', 'Carpathians'),
+  (3,  3,  2, 1, 1, 'Taras MC Standard',       '2021-06-12 14:15:00', '4149493344556603', '109', '7744', 'Odesa'),
+  (4,  4,  3, 2, 3, 'Yulia Credit Gold',       '2021-08-01 09:00:00', '4149494455667704', '654', '1122', 'Kashtan'),
+  (5,  5,  1, 1, 3, 'Andrii Platinum Visa',    '2021-09-18 16:45:00', '5168755566778805', '331', '9081', 'Kharkiv'),
+  (6,  6,  5, 1, 4, 'Iryna Virtual Shopping',  '2022-02-10 12:20:00', '4149496677889906', '942', '5566', 'Summer'),
+  (7,  7,  2, 3, 1, 'Dmytro Debit (Lost)',     '2022-04-05 15:10:00', '5168757788990007', '215', '3412', 'Horizon'),
+  (8,  8,  1, 1, 2, 'Nataliia Everyday Visa',  '2022-07-22 17:35:00', '4149498899001108', '773', '6789', 'Poltava'),
+  (9,  9,  4, 1, 3, 'Maksym World Elite MC',   '2022-11-03 13:00:00', '5168759900112209', '480', '2024', 'Desna'),
+  (10, 10, 5, 1, 4, 'Olena Digital Pass',      '2023-01-19 18:40:00', '4149490011223310', '167', '8123', 'Hoverla'),
+  (11, 11, 2, 1, 2, 'Serhii Business MC',      '2023-05-14 10:25:00', '5168751122334411', '593', '4490', 'Lutsk');
+
 
 -- -----------------------------------------------------
 -- 5. Transactions
@@ -393,4 +415,31 @@ VALUES
   (10, 9,  11,  '2024-02-20 13:10:00',  50000, 'Transfer received from Rudenko M. consulting contract'),
   (11, 10, 11, '2024-02-24 15:40:22',   -450, 'Apotheka purchases'),
   (12, 11, 10, '2024-02-28 17:05:00', -18000, 'Supplier settlement payment for spare truck parts');
+
+
+
+DELIMITER //
+
+CREATE TRIGGER check_card_pattern_exists_before_insert
+BEFORE INSERT ON `mydb`.`card`
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM `mydb`.`card_pattern` WHERE `id` = NEW.card_pattern_id) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: this card pattern does not exist';
+    END IF;
+END//
+
+CREATE TRIGGER check_card_pattern_exists_before_update
+BEFORE UPDATE ON `mydb`.`card`
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM `mydb`.`card_pattern` WHERE `id` = NEW.card_pattern_id) THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Error: this card pattern does not exist';
+    END IF;
+END//
+
+DELIMITER ;
+
 

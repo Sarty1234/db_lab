@@ -135,10 +135,15 @@ def read_accounts(id: int = None, skip: int = 0, limit: int = 100, db: Session =
         return account
     return account_service.get_all(db, skip=skip, limit=limit)
 
-@app.post("/accounts", tags=['Accounts'], summary="Create new account", status_code=201)
-def create_account(new_account: NewAccountItem, db: Session = Depends(get_db)):
-    account_service.create(db, new_account.dict())
-    return {"success": True, "message": "Account added successfully"}
+# @app.post("/accounts", tags=['Accounts'], summary="Create new account", status_code=201)
+# def create_account(new_account: NewAccountItem, db: Session = Depends(get_db)):
+#     account_service.create(db, new_account.dict())
+#     return {"success": True, "message": "Account added successfully"}
+
+@app.post("/accounts", tags=['Accounts'], summary="Create new account with Stored Procedure", status_code=201)
+def create_account_via_procedure(new_account: NewAccountItem, db: Session = Depends(get_db)):
+    account_service.create_with_procedure(db, new_account.dict())
+    return { "success": True, "message": "Account added successfully" }
 
 @app.put("/accounts", tags=['Accounts'], summary="Update account")
 def update_account(account_data: UpdateAccountItem, db: Session = Depends(get_db)):
