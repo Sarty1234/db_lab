@@ -538,6 +538,61 @@ BEGIN
 END//
 
 
+
+
+DROP PROCEDURE IF EXISTS `mydb`.`sp_cursor_create_dynamic_tables`//
+
+CREATE PROCEDURE `mydb`.`sp_cursor_create_dynamic_tables`()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_base_name VARCHAR(45);
+    DECLARE v_clear_name VARCHAR(45);
+    DECLARE v_timestamp VARCHAR(20);
+    DECLARE v_table_name VARCHAR(120);
+    DECLARE v_col_count INT;
+    DECLARE v_i INT;
+    DECLARE v_columns_sql TEXT;
+
+    DECLARE name_cursor CURSOR FOR SELECT `surname` FROM `mydb`.`client`;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    SET v_timestamp = DATE_FORMAT(NOW(), '%Y%m%d_%H%i%s');
+
+    OPEN name_cursor;
+    read_loop: LOOP
+        FETCH name_cursor INTO v_base_name;
+        
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET v_clear_name = REPLACE(REPLACE(TRIM(v_base_name), ' ', '_'), '-', '_');
+        SET v_table_name = CONCAT(v_clear_name, '_', v_timestamp);
+
+        SET v_col_count = FLOOR(1 + RAND() * 9);
+        SET v_i = 1;
+        SET v_columns_sql = '';
+
+        WHILE v_i <= v_col_count DO
+            IF v_i > 1 THEN
+                SET v_columns_sql = CONCAT(v_columns_sql, ', ');
+            END IF;
+            
+            SET v_columns_sql = CONCAT(v_columns_sql, 'col_', v_i, ' VARCHAR(50) NULL');
+            SET v_i = v_i + 1;
+        END WHILE;
+
+        SET @sql_query = CONCAT('CREATE TABLE IF NOT EXISTS `mydb`.`', v_table_name, '` (',
+            v_columns_sql, ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;');
+
+        PREPARE sql_task FROM @sql_query;
+        EXECUTE sql_task;
+        DEALLOCATE PREPARE sql_task;
+    END LOOP;
+    CLOSE name_cursor;
+END//
+
+
+
 DELIMITER ;
 
 
