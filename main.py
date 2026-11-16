@@ -14,14 +14,16 @@ from service import (
     ClientSecretDataService,
     AccountService,
     CardService,
-    TransactionService
+    TransactionService,
+    ClientAccountService,
 )
 from dto import (
     NewClientItem, UpdateClientItem,
     NewClientSecretItem, UpdateClientSecretItem,
     NewAccountItem, UpdateAccountItem,
     NewCardItem, UpdateCardItem,
-    NewTransactionItem
+    NewTransactionItem,
+    NewClientAccountByName,
 )
 
 load_dotenv()
@@ -59,6 +61,7 @@ secret_service = ClientSecretDataService()
 account_service = AccountService()
 card_service = CardService()
 transaction_service = TransactionService()
+client_account_service = ClientAccountService()
 
 
 
@@ -91,6 +94,35 @@ def delete_client(client_id: int, db: Session = Depends(get_db)):
     if not result:
         raise HTTPException(status_code=404, detail="Client not found")
     return {"success": True, "message": "Client removed successfully"}
+
+
+
+
+####################### CLIENT ACCOUNT #######################
+@app.get("/client-accounts", tags=["Client Account"], summary="Get all client-account links")
+def read_client_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return client_account_service.get_all(db, skip=skip, limit=limit)
+
+@app.get("/client-accounts/by-client/{client_id}", tags=["Client Account"], summary="Get accounts by client ID")
+def get_accounts_by_client(client_id: int, db: Session = Depends(get_db)):
+    return client_account_service.dao.get_by_client(db, client_id)
+
+@app.get("/client-accounts/by-account/{account_id}", tags=["Client Account"], summary="Get clients by account ID")
+def get_clients_by_account(account_id: int, db: Session = Depends(get_db)):
+    return client_account_service.dao.get_by_account(db, account_id)
+
+@app.post("/client-accounts/by-names", tags=["Client Account"], summary="Link client and account by real names (M:M task)", status_code=201)
+def create_client_account_by_names(data: NewClientAccountByName, db: Session = Depends(get_db)):
+    client_account_service.create_by_names(db, data.model_dump())
+    return { "success": True, "message": "Link created successfully", }
+
+
+@app.delete("/client-accounts", tags=["Client Account"], summary="Delete client-account link by composite primary key")
+def delete_client_account(account_id: int, client_id: int, db: Session = Depends(get_db)):
+    result = client_account_service.delete(db, account_id, client_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Client-Account link not found")
+    return {"success": True, "message": "Link successfully removed"}
 
 
 
