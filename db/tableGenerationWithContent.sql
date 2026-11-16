@@ -502,6 +502,42 @@ BEGIN
 END//
 
 
+
+
+
+DROP FUNCTION IF EXISTS `mydb`.`fn_get_account_balance_stat`//
+DROP PROCEDURE IF EXISTS `mydb`.`sp_show_account_balance_stat`//
+
+CREATE FUNCTION `mydb`.`fn_get_account_balance_stat`(p_operation VARCHAR(10))
+RETURNS DECIMAL(15, 2)
+READS SQL DATA
+BEGIN
+    DECLARE v_result DECIMAL(15, 2);
+
+    CASE UPPER(p_operation)
+        WHEN 'MAX' THEN
+            SELECT MAX(`balance`) INTO v_result FROM `mydb`.`account`;
+        WHEN 'MIN' THEN
+            SELECT MIN(`balance`) INTO v_result FROM `mydb`.`account`;
+        WHEN 'SUM' THEN
+            SELECT SUM(`balance`) INTO v_result FROM `mydb`.`account`;
+        WHEN 'AVG' THEN
+            SELECT AVG(`balance`) INTO v_result FROM `mydb`.`account`;
+        ELSE
+            SET v_result = NULL;
+    END CASE;
+
+    RETURN v_result;
+END//
+
+CREATE PROCEDURE `mydb`.`sp_show_account_balance_stat`(IN p_operation VARCHAR(10))
+BEGIN
+    SELECT 
+        UPPER(p_operation) AS `operation_type`,
+        `mydb`.`fn_get_account_balance_stat`(p_operation) AS `calculated_value`;
+END//
+
+
 DELIMITER ;
 
 
