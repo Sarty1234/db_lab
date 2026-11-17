@@ -487,22 +487,31 @@ END//
 
 
 
+
 DROP PROCEDURE IF EXISTS `mydb`.`sp_insert_10_card_patterns`//
 
-CREATE PROCEDURE `mydb`.`sp_insert_10_card_patterns`()
+CREATE PROCEDURE `mydb`.`sp_insert_10_card_patterns`(
+    IN p_name_prefix VARCHAR(45),
+    IN p_start_num INT
+)
 BEGIN
-    INSERT INTO `mydb`.`card_pattern` (`name`, `pattern_path`) VALUES
-        ('Noname1', 'patterns/noname1.png'),
-        ('Noname2', 'patterns/noname2.png'),
-        ('Noname3', 'patterns/noname3.png'),
-        ('Noname4', 'patterns/noname4.png'),
-        ('Noname5', 'patterns/noname5.png'),
-        ('Noname6', 'patterns/noname6.png'),
-        ('Noname7', 'patterns/noname7.png'),
-        ('Noname8', 'patterns/noname8.png'),
-        ('Noname9', 'patterns/noname9.png'),
-        ('Noname10', 'patterns/noname10.png');
+    DECLARE v_i INT DEFAULT 0;
+    DECLARE v_current_num INT;
+    DECLARE v_name VARCHAR(100);
+    DECLARE v_path VARCHAR(255);
+
+    WHILE v_i < 10 DO
+        SET v_current_num = p_start_num + v_i;
+        SET v_name = CONCAT(p_name_prefix, v_current_num);
+        SET v_path = CONCAT('patterns/', LOWER(p_name_prefix), v_current_num, '.png');
+        
+        INSERT INTO `mydb`.`card_pattern` (`name`, `pattern_path`) 
+        VALUES (v_name, v_path);
+        
+        SET v_i = v_i + 1;
+    END WHILE;
 END//
+
 
 
 

@@ -64,7 +64,7 @@ class ClientAccountDAO(BaseDAO[ClientAccount]):
             raise HTTPException(
                 status_code=404,
                 detail=(
-                    "Клієнта або рахунок не знайдено."
+                    "Client or account not found"
                 ),
             )
         return True

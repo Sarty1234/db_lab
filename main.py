@@ -255,9 +255,13 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
 ####################### SAVED PROCEDURE #######################
 
 @app.post("/procedures/card-patterns", tags=['Saved Procedures'], summary="Insert 10 card patterns by stored procedure", status_code=201)
-def run_insert_card_patterns(db: Session = Depends(get_db)):
-    card_service.insert_10_patterns(db)
-    return {"success": True, "message": "10 card patterns successfully inserted by procedure"}
+def run_insert_card_patterns(
+    name_prefix: str = "Noname", 
+    start_num: int = 1, 
+    db: Session = Depends(get_db)
+):
+    card_service.insert_10_patterns(db, name_prefix, start_num)
+    return { "success": True, "message": f"10 card patterns successfully inserted by procedure" }
 
 @app.get("/procedures/account-stats", tags=['Saved Procedures'], summary="Get account balance statistics")
 def get_account_balance_stat(operation: str, db: Session = Depends(get_db)):

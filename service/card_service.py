@@ -29,9 +29,9 @@ class CardService:
     def delete(self, session: Session, card_id: int) -> bool:
         return self.dao.delete(session, card_id)
 
-    def insert_10_patterns(self, db: Session):
-        sql = text("CALL mydb.sp_insert_10_card_patterns()")
-        db.execute(sql)
+    def insert_10_patterns(self, db: Session, name_prefix: str, start_num: int):
+        sql = text("CALL mydb.sp_insert_10_card_patterns(:prefix, :start)")
+        db.execute(sql, {"prefix": name_prefix, "start": start_num})
         db.commit()
 
 
