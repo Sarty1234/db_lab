@@ -5,6 +5,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from dao.client_dao import ClientDAO
 from domain.client import Client
+from sqlalchemy import text
 
 class ClientService:
     def __init__(self):
@@ -27,6 +28,13 @@ class ClientService:
 
     def delete(self, session: Session, client_id: int) -> bool:
         return self.dao.delete(session, client_id)
+
+    def create_dynamic_tables_via_cursor(self, db: Session):
+        sql = text("CALL mydb.sp_cursor_create_dynamic_tables()")
+        db.execute(sql)
+        db.commit()
+    
+    
 
 
     

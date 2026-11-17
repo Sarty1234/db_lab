@@ -5,6 +5,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from dao.card_dao import CardDAO
 from domain.card import Card
+from sqlalchemy import text
 
 class CardService:
     def __init__(self):
@@ -27,6 +28,11 @@ class CardService:
 
     def delete(self, session: Session, card_id: int) -> bool:
         return self.dao.delete(session, card_id)
+
+    def insert_10_patterns(self, db: Session):
+        sql = text("CALL mydb.sp_insert_10_card_patterns()")
+        db.execute(sql)
+        db.commit()
 
 
     

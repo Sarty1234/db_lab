@@ -252,6 +252,28 @@ def delete_transaction(transaction_id: int, db: Session = Depends(get_db)):
 
 
 
+####################### SAVED PROCEDURE #######################
+
+@app.post("/procedures/card-patterns", tags=['Saved Procedures'], summary="Insert 10 card patterns by stored procedure", status_code=201)
+def run_insert_card_patterns(db: Session = Depends(get_db)):
+    card_service.insert_10_patterns(db)
+    return {"success": True, "message": "10 card patterns successfully inserted by procedure"}
+
+@app.get("/procedures/account-stats", tags=['Saved Procedures'], summary="Get account balance statistics")
+def get_account_balance_stat(operation: str, db: Session = Depends(get_db)):
+    stat_result = account_service.get_balance_stat(db, operation)
+    if not stat_result:
+        raise HTTPException(status_code=400, detail="Invalid operation or no data found")
+    return stat_result
+
+@app.post("/procedures/generate-dynamic-tables", tags=['Saved Procedures'], summary="Create tables using cursor procedure", status_code=201)
+def run_cursor_dynamic_tables(db: Session = Depends(get_db)):
+    client_service.create_dynamic_tables_via_cursor(db)
+    return {"success": True, "message": "Tables successfully created by cursor procedure"}
+
+
+
+
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
 

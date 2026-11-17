@@ -5,6 +5,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from dao.account_dao import AccountDAO
 from domain.account import Account
+from sqlalchemy import text
 
 class AccountService:
     def __init__(self):
@@ -31,5 +32,11 @@ class AccountService:
 
     def delete(self, session: Session, account_id: int) -> bool:
         return self.dao.delete(session, account_id)
+
+    def get_balance_stat(self, db: Session, operation: str):
+        sql = text("CALL mydb.sp_show_account_balance_stat(:op)")
+        result = db.execute(sql, {"op": operation}).mappings().first()
+        db.commit()
+        return dict(result) if result else None
 
     
