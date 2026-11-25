@@ -1,12 +1,15 @@
 
 
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.responses import JSONResponse
 import uvicorn
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.exc import OperationalError, DatabaseError
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+
 
 
 from service import (
@@ -33,10 +36,20 @@ engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
+
 def get_db():
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
@@ -63,6 +76,40 @@ card_service = CardService()
 transaction_service = TransactionService()
 client_account_service = ClientAccountService()
 
+
+
+
+@app.exception_handler(OperationalError)
+@app.exception_handler(DatabaseError)
+async def sqlalchemy_trigger_exception_handler(request: Request, exc: DatabaseError):
+    db_error = getattr(exc, "orig", None)
+    
+    if db_error and hasattr(db_error, "args") and len(db_error.args) >= 2:
+        error_code, error_message = db_error.args[0], db_error.args[1]
+        # my errors
+        if error_code == 1644:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "detail": error_message
+                }
+            )
+            
+        # Foreign Key errors
+        if error_code in (1451, 1452):
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "success": False,
+                    "detail": "Порушення Foreign Key у базі данних"
+                }
+            )
+
+    return JSONResponse(
+        status_code=500,
+        content={"success": False, "detail": "Internal database error"}
+    )
 
 
 
@@ -111,7 +158,7 @@ def get_accounts_by_client(client_id: int, db: Session = Depends(get_db)):
 def get_clients_by_account(account_id: int, db: Session = Depends(get_db)):
     return client_account_service.dao.get_by_account(db, account_id)
 
-@app.post("/client-accounts/by-names", tags=["Client Account"], summary="Link client and account by real names (M:M task)", status_code=201)
+@app.post("/client-accounts/by-names", tags=["Client Account"], summary="Link client and account by real names", status_code=201)
 def create_client_account_by_names(data: NewClientAccountByName, db: Session = Depends(get_db)):
     client_account_service.create_by_names(db, data.model_dump())
     return { "success": True, "message": "Link created successfully", }
